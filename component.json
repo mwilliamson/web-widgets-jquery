@@ -1,0 +1,7 @@
+{
+  "name": "web-widgets-jquery",
+  "scripts": ["index.js"],
+  "dependencies": {
+    "components/jquery": "*"
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "name": "web-widgets-jquery",
+  "version": "0.1.0",
+  "dependencies": {},
+  "devDependencies": {
+    "nodeunit": "~0.8.1",
+    "component": "~0.17.0",
+    "connect": "~2.8.4",
+    "grunt-cli": "~0.1.9",
+    "grunt": "~0.4.1",
+    "grunt-contrib-qunit": "~0.2.2"
+  }
+}
