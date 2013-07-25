@@ -5,19 +5,28 @@ var url = require("url");
 
 var _ = require("underscore");
 var connect = require("connect");
+var glob = require("glob");
 
 var template = fs.readFileSync(path.join(__dirname, "template.html"), "utf8");
 
 
 function startServer(options) {
-    var app = connect()
-        .use(serveIndex(options));
+    var app = connect();
 
     for (name in options.dependencies) {
         app = app.use(serveFile(name, options.dependencies[name]));
     }
 
+    var testFiles = glob.sync(options.tests);
+    var testSrcs = testFiles.map(function(testFile, index) {
+        var name = "/__tests/" + index + ".js";
+        app = app.use(serveFile(name, testFile));
+        return name;
+    });
+
     app = app.use(connect.static(__dirname));
+
+    app = app.use(serveIndex(options, testSrcs));
 
     http.createServer(app).listen(options.port);
 }
@@ -36,7 +45,7 @@ function serveFile(name, path) {
     };
 }
 
-function serveIndex(options) {
+function serveIndex(options, testSrcs) {
     return function(request, response, next) {
         if (request.url !== "/") {
             next();
@@ -47,17 +56,11 @@ function serveIndex(options) {
             
             var dependencies = _.keys(options.dependencies);
             
-            fs.readdir(__dirname, function(err, filenames) {
-                var testFiles = Array.prototype.filter.call(filenames, function(name) {
-                    return /\.test\.js$/.test(name);
-                });
-
-                var html = writeScriptTags(template, "DEPENDENCY_SCRIPTS", dependencies);
-                html = writeScriptTags(html, "TEST_SCRIPTS", testFiles);
-                response.write(html);
-                
-                response.end();
-            });
+            var html = writeScriptTags(template, "DEPENDENCY_SCRIPTS", dependencies);
+            html = writeScriptTags(html, "TEST_SCRIPTS", testSrcs);
+            response.write(html);
+            
+            response.end();
         }
     };
 }
@@ -76,6 +79,7 @@ if (require.main === module) {
         port: 54321,
         dependencies: {
             "/web-widgets-jquery.js": path.join(__dirname, "../_build/web-widgets-jquery.js")
-        }
+        },
+        tests: "tests/**/*.test.js",
     });
 }
