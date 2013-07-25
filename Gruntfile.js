@@ -7,7 +7,7 @@ module.exports = function(grunt) {
                 urls: ["http://localhost:54321"]
             }
         },
-        "serve-qunit-tests": {
+        serve_qunit_tests: {
             options: {
                 port: 54321,
                 dependencies: {
@@ -19,16 +19,8 @@ module.exports = function(grunt) {
     });
 
     grunt.loadNpmTasks('grunt-contrib-qunit');
+    grunt.loadNpmTasks("grunt-serve-qunit-tests");
 
-    grunt.registerMultiTask("serve-qunit-tests", "Server qunit tests", function() {
-        var options = this.options();
-        require("./tests/server").startServer({
-            port: options.port,
-            dependencies: options.dependencies,
-            tests: this.filesSrc
-        });
-    });
-
-    grunt.registerTask("test", ["serve-qunit-tests", "qunit"]);
+    grunt.registerTask("test", ["serve_qunit_tests", "qunit"]);
 
 };
