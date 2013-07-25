@@ -12,20 +12,20 @@ module.exports = function(grunt) {
                 port: 54321,
                 dependencies: {
                     "/web-widgets-jquery.js": "_build/web-widgets-jquery.js"
-                },
-                tests: "tests/**/*.test.js"
-            }
+                }
+            },
+            src: "tests/**/*.test.js"
         }
     });
 
     grunt.loadNpmTasks('grunt-contrib-qunit');
 
-    grunt.registerTask("serve-qunit-tests", "Server qunit tests", function() {
+    grunt.registerMultiTask("serve-qunit-tests", "Server qunit tests", function() {
         var options = this.options();
         require("./tests/server").startServer({
             port: options.port,
             dependencies: options.dependencies,
-            tests: options.tests
+            tests: this.filesSrc
         });
     });
 

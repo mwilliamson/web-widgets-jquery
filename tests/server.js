@@ -5,7 +5,6 @@ var url = require("url");
 
 var _ = require("underscore");
 var connect = require("connect");
-var glob = require("glob");
 
 var template = fs.readFileSync(path.join(__dirname, "template.html"), "utf8");
 
@@ -18,9 +17,7 @@ function startServer(options) {
     for (name in options.dependencies) {
         app = app.use(serveFile(name, options.dependencies[name]));
     }
-
-    var testFiles = glob.sync(options.tests);
-    var testSrcs = testFiles.map(function(testFile, index) {
+    var testSrcs = options.tests.map(function(testFile, index) {
         var name = "/__tests/" + index + ".js";
         app = app.use(serveFile(name, testFile));
         return name;
