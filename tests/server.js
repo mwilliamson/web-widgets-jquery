@@ -3,7 +3,7 @@ var path = require("path");
 var http = require("http");
 var url = require("url");
 
-
+var _ = require("underscore");
 var connect = require("connect");
 
 var template = fs.readFileSync(path.join(__dirname, "template.html"), "utf8");
@@ -11,7 +11,7 @@ var template = fs.readFileSync(path.join(__dirname, "template.html"), "utf8");
 
 function startServer(options) {
     var app = connect()
-        .use(serveIndex);
+        .use(serveIndex(options));
 
     for (name in options.dependencies) {
         app = app.use(serveFile(name, options.dependencies[name]));
@@ -36,26 +36,30 @@ function serveFile(name, path) {
     };
 }
 
-function serveIndex(request, response, next) {
-    if (request.url !== "/") {
-        next();
-    } else {
-        response.writeHead(200, {
-            "content-type": "text/html;charset=utf8"
-        });
-        
-        fs.readdir(__dirname, function(err, filenames) {
-            var testFiles = Array.prototype.filter.call(filenames, function(name) {
-                return /\.test\.js$/.test(name);
+function serveIndex(options) {
+    return function(request, response, next) {
+        if (request.url !== "/") {
+            next();
+        } else {
+            response.writeHead(200, {
+                "content-type": "text/html;charset=utf8"
             });
-
-            var html = writeScriptTags(template, "DEPENDENCY_SCRIPTS", ["/web-widgets-jquery.js"]);
-            html = writeScriptTags(html, "TEST_SCRIPTS", testFiles);
-            response.write(html);
             
-            response.end();
-        });
-    }
+            var dependencies = _.keys(options.dependencies);
+            
+            fs.readdir(__dirname, function(err, filenames) {
+                var testFiles = Array.prototype.filter.call(filenames, function(name) {
+                    return /\.test\.js$/.test(name);
+                });
+
+                var html = writeScriptTags(template, "DEPENDENCY_SCRIPTS", dependencies);
+                html = writeScriptTags(html, "TEST_SCRIPTS", testFiles);
+                response.write(html);
+                
+                response.end();
+            });
+        }
+    };
 }
 
 function writeScriptTags(template, holeName, fileNames) {

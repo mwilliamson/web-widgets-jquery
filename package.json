@@ -8,6 +8,7 @@
     "connect": "~2.8.4",
     "grunt-cli": "~0.1.9",
     "grunt": "~0.4.1",
-    "grunt-contrib-qunit": "~0.2.2"
+    "grunt-contrib-qunit": "~0.2.2",
+    "underscore": "~1.5.1"
   }
 }
