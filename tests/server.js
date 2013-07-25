@@ -48,19 +48,23 @@ function serveIndex(request, response, next) {
             var testFiles = Array.prototype.filter.call(filenames, function(name) {
                 return /\.test\.js$/.test(name);
             });
-            
-            var scriptElements = testFiles.map(function(name) {
-                var src = "/" + name;
-                return '<script src="' + src + '"></script>';
-            });
-            var scriptHtml = scriptElements.join("\n");
-            var html = template.replace("<!-- SCRIPTS -->", scriptHtml);
-            
+
+            var html = writeScriptTags(template, "DEPENDENCY_SCRIPTS", ["/web-widgets-jquery.js"]);
+            html = writeScriptTags(html, "TEST_SCRIPTS", testFiles);
             response.write(html);
             
             response.end();
         });
     }
+}
+
+function writeScriptTags(template, holeName, fileNames) {
+    var scriptElements = fileNames.map(function(name) {
+        // TODO: escaping
+        return '<script src="' + name + '"></script>';
+    });
+    var scriptHtml = scriptElements.join("\n");
+    return template.replace("<!-- " + holeName + " -->", scriptHtml);
 }
 
 if (require.main === module) {
