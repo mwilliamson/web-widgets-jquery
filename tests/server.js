@@ -1,11 +1,40 @@
 var fs = require("fs");
 var path = require("path");
 var http = require("http");
+var url = require("url");
+
 
 var connect = require("connect");
 
 var template = fs.readFileSync(path.join(__dirname, "template.html"), "utf8");
 
+
+function startServer(options) {
+    var app = connect()
+        .use(serveIndex);
+
+    for (name in options.dependencies) {
+        app = app.use(serveFile(name, options.dependencies[name]));
+    }
+
+    app = app.use(connect.static(__dirname));
+
+    http.createServer(app).listen(options.port);
+}
+
+function serveFile(name, path) {
+    return function(request, response, next) {
+        if (url.parse(request.url).pathname === name) {
+            response.writeHead(200, {"content-type": "text/javascript"});
+            fs.readFile(path, function(err, contents) {
+                response.write(contents);
+                response.end();
+            });
+        } else {
+            next();
+        }
+    };
+}
 
 function serveIndex(request, response, next) {
     if (request.url !== "/") {
@@ -34,9 +63,11 @@ function serveIndex(request, response, next) {
     }
 }
 
-var app = connect()
-    .use(serveIndex)
-    .use(connect.static(path.join(__dirname, "../_build")))
-    .use(connect.static(__dirname));
-
-http.createServer(app).listen(54321);
+if (require.main === module) {
+    startServer({
+        port: 54321,
+        dependencies: {
+            "/web-widgets-jquery.js": path.join(__dirname, "../_build/web-widgets-jquery.js")
+        }
+    });
+}
