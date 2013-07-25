@@ -10,6 +10,8 @@ var glob = require("glob");
 var template = fs.readFileSync(path.join(__dirname, "template.html"), "utf8");
 
 
+exports.startServer = startServer;
+
 function startServer(options) {
     var app = connect();
 
@@ -74,12 +76,3 @@ function writeScriptTags(template, holeName, fileNames) {
     return template.replace("<!-- " + holeName + " -->", scriptHtml);
 }
 
-if (require.main === module) {
-    startServer({
-        port: 54321,
-        dependencies: {
-            "/web-widgets-jquery.js": path.join(__dirname, "../_build/web-widgets-jquery.js")
-        },
-        tests: "tests/**/*.test.js",
-    });
-}
